@@ -6,11 +6,15 @@ namespace ADOBuildLight.Services;
 // Real GPIO implementation
 public class RealGpioService : IGpioService
 {
-  private GpioController? _controller;
+  private readonly IGpioController _controller;
+
+  public RealGpioService(IGpioController controller)
+  {
+    _controller = controller;
+  }
 
   public void Initialize()
   {
-    _controller = new GpioController();
     _controller.OpenPin(GpioPins.Red, PinMode.Output);
     _controller.OpenPin(GpioPins.Yellow, PinMode.Output);
     _controller.OpenPin(GpioPins.Green, PinMode.Output);
@@ -29,8 +33,6 @@ public class RealGpioService : IGpioService
 
   public void SetLightColor(int color)
   {
-    if (_controller == null) return;
-
     switch (color)
     {
       case var pin when pin == GpioPins.Red:

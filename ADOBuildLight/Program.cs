@@ -2,6 +2,7 @@
 using ADOBuildLight.Interfaces;
 using ADOBuildLight.Services;
 using ADOBuildLight.Models;
+using System.Device.Gpio;
 
 namespace ADOBuildLight;
 
@@ -57,7 +58,7 @@ class Program
       if (IsRaspberryPi())
       {
         Console.WriteLine("Detected Raspberry Pi - using real GPIO");
-        return new RealGpioService();
+        return new RealGpioService(new GpioControllerWrapper());
       }
       else
       {
