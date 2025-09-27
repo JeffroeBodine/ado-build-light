@@ -1,0 +1,129 @@
+# ---- .NET / C# standard ignores ----
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Build results for solution-level (in case of misplaced builds)
+**/bin/
+**/obj/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/*.code-workspace
+*.code-workspace
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+*.ipr
+*.iws
+*.iml
+
+# IIS Express
+.*/iisexpress/
+*/*/iisexpress/
+
+# dotnet glob cache
+.nuget/packages/
+# Optional: enable if you ever use a local packages folder
+# packages/
+
+# Logs
+*.log
+logs/
+
+# User secrets (keep secrets out of repo)
+secrets.json
+**/secrets.json
+
+# Environment & local settings
+*.env
+*.local
+.env*
+appsettings.json
+
+# Coverage / test results
+coverage/
+TestResults/
+*.coverage
+*.coveragexml
+*.opencover.xml
+*.lcov
+*.trx
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# NCrunch
+_NCrunch_*/
+.*crunch*.local.xml
+ncrunch*.*
+
+# Azure Pipelines / artifacts
+*.azp
+AzurePipelines.*.yml
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# StyleCop
+StyleCopReport.xml
+
+# DotCover
+.idea/.dotCover
+*.dotCover
+
+# NuGet
+*.nupkg
+*.snupkg
+# Packages lock (if you want to keep it, comment this out)
+# packages.lock.json
+
+# Symbols
+*.pdb
+
+# Others
+*.swp
+*.orig
+*.tmp
+~$*
+
+# Rider / JetBrains plugin caches
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/dictionaries
+.idea/**/libraries
+.idea/**/shelf
+
+# OS generated
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# T4 / Generated (if applicable)
+*.generated.cs
+
+# Publish artifacts
+**/publish/
+*.publish.xml
+
+# Local tooling
+.toolstarget
+.tools/
+
+# --- Project-specific notes ---
+# appsettings.json is currently tracked because it includes required runtime settings.
+# If you store secrets (like a PAT) in appsettings.json, consider moving them to user secrets or environment variables
+# and uncomment the ignore line below:
+# appsettings.json
+
+# Keep the example config versioned
+!appsettings.example.json
+
+# Sample response file (decide if you want it tracked). Currently tracked.
+# /ADOBuildLight/Services/azuresampleresponse.json
