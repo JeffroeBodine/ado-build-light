@@ -16,7 +16,7 @@ public class PipelineService : IPipelineService
     private readonly string _pipelineId;
     private readonly string _personalAccessToken;
 
-    public PipelineService(IConfig config)
+    public PipelineService(IAppConfiguration config)
     {
         _httpClient = new HttpClient();
         _organization = config.Organization;

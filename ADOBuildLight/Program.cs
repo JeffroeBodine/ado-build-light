@@ -9,7 +9,7 @@ class Program
 {
   static async Task Main(string[] args)
   {
-    var config = new Config();
+    var config = new ADOBuildLight.Models.Configuration();
 
     IPipelineService pipelineService = new PipelineService(config);
     IGpioService? gpioService = CreateGpioService();
@@ -26,7 +26,7 @@ class Program
           var overallStatus = GetOverallStatus(latestRun?.Status, latestRun?.Result);
           Console.WriteLine($"Overall Status: {overallStatus}");
 
-          UpdateBuildLight(overallStatus, _gpioService);
+          UpdateBuildLight(overallStatus, gpioService);
         }
         else
         { 
@@ -150,7 +150,7 @@ class Program
     Console.ResetColor();
   }
 
-  static bool IsWithinBusinessHours(Config config)
+  static bool IsWithinBusinessHours(IAppConfiguration config)
   {
     var now = DateTime.Now;
 

@@ -1,6 +1,6 @@
 namespace ADOBuildLight.Interfaces;
 
-public interface IConfiguration
+public interface IAppConfiguration
 {
     string Organization { get; set; }
     string Project { get; set; }
