@@ -10,7 +10,6 @@ namespace ADOBuildLight.Tests
         [Test]
         public void HandlesArgumentExceptionWithNewSyntax()
         {
-            Assert.That(1, Is.EqualTo(1));
             1.Should().Be(1);
         }
     }
