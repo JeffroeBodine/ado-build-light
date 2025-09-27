@@ -12,8 +12,8 @@ class Program
     var config = new Config();
 
     IPipelineService pipelineService = new PipelineService(config);
-    IGpioService? _gpioService = CreateGpioService();
-    _gpioService.Initialize();
+    IGpioService? gpioService = CreateGpioService();
+    gpioService.Initialize();
 
     try
     {
@@ -32,7 +32,7 @@ class Program
         { 
           Console.WriteLine($"Outside of business hours. Skipping check. ({DateTime.Now:HH:mm:ss})");
           // Optionally turn lights off or set a specific color for "off-duty"
-          UpdateBuildLight("offduty", _gpioService);
+          UpdateBuildLight("offduty", gpioService);
         }
 
         Console.WriteLine($"Next check in 1 minute... ({DateTime.Now:HH:mm:ss})");
@@ -46,7 +46,7 @@ class Program
     finally
     {
       Console.ForegroundColor = ConsoleColor.White;
-      _gpioService?.Dispose();
+      gpioService?.Dispose();
     }
   }
 
