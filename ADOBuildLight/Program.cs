@@ -10,20 +10,23 @@ class Program
   static async Task Main(string[] args)
   {
     var config = new Config();
-    IGpioService? gpioService = null;
+
+    IPipelineService pipelineService = new PipelineService(config);
+    IGpioService? _gpioService = CreateGpioService();
+
     try
     {
-
-
-
-
-
-
-      gpioService = CreateGpioService();
-      
-
       while (true)
       {
+        var latestRun = await pipelineService.GetLatestPipelineRunAsync();
+
+
+        var overallStatus = GetOverallStatus(latestRun?.State, latestRun?.Result);
+        Console.WriteLine($"Overall Status: {overallStatus}");
+
+        HandleBuildStatus(overallStatus, _gpioService);
+        _gpioService.Initialize();
+
         Console.WriteLine($"Next check in 1 minute... ({DateTime.Now:HH:mm:ss})");
         await Task.Delay(TimeSpan.FromMinutes(1));
       }
@@ -35,7 +38,7 @@ class Program
     finally
     {
       Console.ForegroundColor = ConsoleColor.White;
-      gpioService?.Dispose();
+      _gpioService?.Dispose();
     }
   }
 
@@ -75,4 +78,62 @@ class Program
       return false;
     }
   }
+
+  static string GetOverallStatus(string? state, string? result)
+  {
+    // If pipeline is still in progress, return the state
+    if (state != null && state.Equals("inProgress", StringComparison.OrdinalIgnoreCase))
+    {
+      return "inProgress";
+    }
+
+    // If pipeline is completed, return the result
+    if (state != null && state.Equals("completed", StringComparison.OrdinalIgnoreCase))
+    {
+      return result?.ToLower() ?? "unknown";
+    }
+
+    // For other states, return the state or "unknown" if null
+    return state?.ToLower() ?? "unknown";
+  }
+  static void HandleBuildStatus(string status, IGpioService? gpioService)
+    {
+        switch (status.ToLower())
+        {
+            case "succeeded":
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("✅ Build passed");
+                gpioService?.SetLightColor(GpioPins.Green);
+                break;
+            case "failed":
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("🚨 Build failed");
+                gpioService?.SetLightColor(GpioPins.Red);
+                break;
+            case "partiallysucceeded":
+            case "partially succeeded":
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Console.WriteLine("⚠️ Build partially succeeded");
+                gpioService?.SetLightColor(GpioPins.Orange); // Using Orange pin
+                break;
+            case "inprogress":
+            case "running":
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("🏃‍➡️ Build in progress");
+                gpioService?.SetLightColor(GpioPins.Yellow);
+                break;
+            case "canceled":
+            case "cancelled":
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("🛑 Build cancelled");
+                gpioService?.SetLightColor(GpioPins.None);
+                break;
+            default:
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine($"❔ Build status unknown ({status})");
+                gpioService?.SetLightColor(GpioPins.None);
+                break;
+        }
+        Console.ResetColor();
+    }
 }
