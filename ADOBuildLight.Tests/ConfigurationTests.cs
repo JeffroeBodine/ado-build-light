@@ -1,7 +1,5 @@
 using NUnit.Framework;
 using ADOBuildLight.Models;
-using System.Collections.Generic;
-
 namespace ADOBuildLight.Tests
 {
     [TestFixture]
