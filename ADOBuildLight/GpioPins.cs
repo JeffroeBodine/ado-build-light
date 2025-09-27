@@ -6,5 +6,5 @@ public static class GpioPins
     public const int Yellow = 20;
     public const int Green = 21;
     public const int None = -1; // Represents 'all off'
-    public const int Orange = -2;
+    public const int Orange = -2; // Represents 'partially failing'
 }
