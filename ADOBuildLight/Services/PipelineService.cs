@@ -10,27 +10,29 @@ namespace ADOBuildLight.Services;
 public class PipelineService : IPipelineService
 {
     private readonly HttpClient _httpClient;
-    private readonly IConfig _config;
+
+    private readonly string _organization;
+    private readonly string _project;
+    private readonly string _pipelineId;
+    private readonly string _personalAccessToken;
 
     public PipelineService(IConfig config)
     {
         _httpClient = new HttpClient();
-        _config = config;
+        _organization = config.Organization;
+        _project = config.Project;
+        _pipelineId = config.PipelineId;
+        _personalAccessToken = config.PersonalAccessToken;
     }
 
-    public async Task<PipelineRun?> GetLatestPipelineRunAsync()
+    public async Task<BuildResponse?> GetLatestPipelineRunAsync()
     {
-        var organization = _config.Organization;
-        var project = _config.Project;
-        var pipelineID = _config.PipelineId;
-        var pat = _config.PersonalAccessToken;
-
-        var url = $"https://dev.azure.com/{organization}/{project}/_apis/pipelines/{pipelineID}/runs?api-version=7.1-preview.1";
+        var url = $"https://dev.azure.com/{_organization}/{_project}/_apis/pipelines/{_pipelineId}/runs?api-version=7.1-preview.1";
 
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-            Convert.ToBase64String(Encoding.ASCII.GetBytes($":{pat}")));
+            Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_personalAccessToken}")));
 
         try
         {
@@ -38,11 +40,42 @@ public class PipelineService : IPipelineService
             var pipelineRuns = JsonSerializer.Deserialize<PipelineRunsResponse>(response);
 
             var mostRecentBuild = pipelineRuns?.Value.OrderByDescending(r => r.CreatedDate).FirstOrDefault();
-            return mostRecentBuild;
+
+            if (mostRecentBuild == null)
+            {
+                Console.Error.WriteLine("No pipeline runs found.");
+                return null;
+            }
+
+            return await CheckBuildDetailsAsync(mostRecentBuild.Id);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error fetching pipeline runs: {ex.Message}");
+            return null;
+        }
+    }
+
+    private async Task<BuildResponse?> CheckBuildDetailsAsync(int buildId)
+    {
+        var url = $"https://dev.azure.com/{_organization}/{_project}/_apis/build/builds/{buildId}?api-version=7.1";
+
+        _httpClient.DefaultRequestHeaders.Accept.Clear();
+        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
+            Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_personalAccessToken}")));
+
+        try
+        {
+            var response = await _httpClient.GetStringAsync(url);
+            var buildResponse = JsonSerializer.Deserialize<BuildResponse>(response);
+            //partiallySucceeded
+
+            return buildResponse;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching build details: {ex.Message}");
             return null;
         }
     }

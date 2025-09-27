@@ -4,5 +4,5 @@ namespace ADOBuildLight.Interfaces;
 
 public interface IPipelineService
 {
-    Task<PipelineRun?> GetLatestPipelineRunAsync();
+    Task<BuildResponse?> GetLatestPipelineRunAsync();
 }

@@ -21,7 +21,7 @@ class Program
         var latestRun = await pipelineService.GetLatestPipelineRunAsync();
 
 
-        var overallStatus = GetOverallStatus(latestRun?.State, latestRun?.Result);
+        var overallStatus = GetOverallStatus(latestRun?.Status, latestRun?.Result);
         Console.WriteLine($"Overall Status: {overallStatus}");
 
         HandleBuildStatus(overallStatus, _gpioService);
