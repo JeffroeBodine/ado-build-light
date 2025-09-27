@@ -27,16 +27,13 @@ class Program
           Console.WriteLine($"Overall Status: {overallStatus}");
 
           UpdateBuildLight(overallStatus, _gpioService);
-
         }
         else
         { 
           Console.WriteLine($"Outside of business hours. Skipping check. ({DateTime.Now:HH:mm:ss})");
           // Optionally turn lights off or set a specific color for "off-duty"
           UpdateBuildLight("offduty", _gpioService);
-
         }
-
 
         Console.WriteLine($"Next check in 1 minute... ({DateTime.Now:HH:mm:ss})");
         await Task.Delay(TimeSpan.FromMinutes(1));
@@ -152,20 +149,20 @@ class Program
     }
     Console.ResetColor();
   }
-    
+
   static bool IsWithinBusinessHours(Config config)
   {
     var now = DateTime.Now;
-  
+
     if (config.DaysOfWeek == null || !config.DaysOfWeek.Any())
       return true; // No restrictions if not configured
 
     if (!config.DaysOfWeek.Contains(now.DayOfWeek.ToString(), StringComparer.OrdinalIgnoreCase))
-        return false;
-
+     return false;
+    
     if (now.Hour < config.StartHour || now.Hour >= config.EndHour)
-        return false;
-
+      return false;
+    
     return true;
   }
 }
