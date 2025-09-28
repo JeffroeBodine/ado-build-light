@@ -1,4 +1,4 @@
-name: Publish .NET Application
+name: Publish Artifacts
 
 on:
   workflow_dispatch:
