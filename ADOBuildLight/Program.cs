@@ -8,55 +8,90 @@ namespace ADOBuildLight;
 class Program
 {
   static async Task Main(string[] args)
-  {
-    var configuration = new ConfigurationBuilder()
-      .SetBasePath(Directory.GetCurrentDirectory())
-      .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-      .Build();
-
-    var config = new Models.AppConfiguration();
-    configuration.Bind(config);
-
-    IPipelineService pipelineService = new PipelineService(config);
-    IGpioService? gpioService = CreateGpioService();
-    gpioService.Initialize();
-
-    try
     {
-      while (true)
-      {
-        var latestRun = await pipelineService.GetLatestPipelineRunAsync();
+        IConfigurationRoot configuration;
 
-        if (IsWithinBusinessHours(config))
+        try
         {
-          var overallStatus = GetOverallStatus(latestRun?.Status, latestRun?.Result);
-          Console.WriteLine($"Overall Status: {overallStatus}");
-
-          UpdateBuildLight(overallStatus, gpioService);
+            configuration = new ConfigurationBuilder()
+              .SetBasePath(Directory.GetCurrentDirectory())
+              .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+              .Build();
         }
-        else
-        { 
-          Console.WriteLine($"Outside of business hours. Skipping check. ({DateTime.Now:HH:mm:ss})");
-          // Optionally turn lights off or set a specific color for "off-duty"
-          UpdateBuildLight("offduty", gpioService);
+        catch (FileNotFoundException fnfex)
+        {
+            Console.WriteLine($"Configuration file not found. Please copy and modify the `appsettings.json` file. Error: {fnfex.Message}");
+            throw;
         }
 
-        Console.WriteLine($"Next check in 1 minute... ({DateTime.Now:HH:mm:ss})");
-        await Task.Delay(TimeSpan.FromMinutes(1));
-      }
-    }
-    catch (HttpRequestException ex)
-    {
-      Console.WriteLine($"Error fetching data: {ex.Message}");
-    }
-    finally
-    {
-      Console.ForegroundColor = ConsoleColor.White;
-      gpioService?.Dispose();
-    }
-  }
+        var config = new Models.AppConfiguration();
+        configuration.Bind(config);
+        bool validAppSettingsValues = AppSettingsValidation(config);
+        if (!validAppSettingsValues)
+        {
+            return;
+        }
 
-  static IGpioService CreateGpioService()
+        IPipelineService pipelineService = new PipelineService(config);
+        IGpioService? gpioService = CreateGpioService();
+        gpioService.Initialize();
+
+        try
+        {
+            while (true)
+            {
+                var latestRun = await pipelineService.GetLatestPipelineRunAsync();
+
+                if (IsWithinBusinessHours(config))
+                {
+                    var overallStatus = GetOverallStatus(latestRun?.Status, latestRun?.Result);
+                    Console.WriteLine($"Overall Status: {overallStatus}");
+
+                    UpdateBuildLight(overallStatus, gpioService);
+                }
+                else
+                {
+                    Console.WriteLine($"Outside of business hours. Skipping check. ({DateTime.Now:HH:mm:ss})");
+                    // Optionally turn lights off or set a specific color for "off-duty"
+                    UpdateBuildLight("offduty", gpioService);
+                }
+
+                Console.WriteLine($"Next check in 1 minute... ({DateTime.Now:HH:mm:ss})");
+                await Task.Delay(TimeSpan.FromMinutes(1));
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+        finally
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            gpioService?.Dispose();
+        }
+    }
+
+    private static bool AppSettingsValidation(Models.AppConfiguration config)
+    {
+        if (string.IsNullOrEmpty(config.AzureDevOps.Organization) ||
+            string.IsNullOrEmpty(config.AzureDevOps.Project) ||
+            string.IsNullOrEmpty(config.AzureDevOps.PipelineId) ||
+            string.IsNullOrEmpty(config.AzureDevOps.PersonalAccessToken))
+        {
+            Console.WriteLine("One or more Azure DevOps settings are missing in appsettings.json. Please check Organization, Project, PipelineId, and PersonalAccessToken.");
+            return false;
+        }
+
+        if (config.BusinessHours.DaysOfWeek.Count <= 1 || config.BusinessHours.StartHour == 0 || config.BusinessHours.EndHour == 0)
+        {
+            Console.WriteLine("BusinessHours settings are incomplete. Ensure DaysOfWeek has more than one day, and StartHour and EndHour are not zero.");
+            return false;
+        }
+
+        return true;
+    }
+
+    static IGpioService CreateGpioService()
   {
     try
     {
