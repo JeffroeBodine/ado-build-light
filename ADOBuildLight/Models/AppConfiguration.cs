@@ -21,12 +21,4 @@ public class AppConfiguration : IAppConfiguration
 
     public AzureDevOpsSettings AzureDevOps { get; set; } = new();
     public BusinessHoursSettings BusinessHours { get; set; } = new();
-    // public string Organization => AzureDevOps.Organization;
-    // public string Project => AzureDevOps.Project;
-    // public string PipelineId => AzureDevOps.PipelineId;
-    // public string PersonalAccessToken => AzureDevOps.PersonalAccessToken;
-    
-    // public int StartHour => BusinessHours.StartHour;
-    // public int EndHour => BusinessHours.EndHour;
-    // public List<string> DaysOfWeek => BusinessHours.DaysOfWeek;
 }
