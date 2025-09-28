@@ -1,8 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using ADOBuildLight.Interfaces;
 using ADOBuildLight.Services;
-using ADOBuildLight.Models;
-using System.Device.Gpio;
+using Microsoft.Extensions.Configuration;
 
 namespace ADOBuildLight;
 
@@ -10,7 +9,13 @@ class Program
 {
   static async Task Main(string[] args)
   {
-    var config = new ADOBuildLight.Models.Configuration();
+    var configuration = new ConfigurationBuilder()
+      .SetBasePath(Directory.GetCurrentDirectory())
+      .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+      .Build();
+
+    var config = new Models.AppConfiguration();
+    configuration.Bind(config);
 
     IPipelineService pipelineService = new PipelineService(config);
     IGpioService? gpioService = CreateGpioService();
@@ -155,13 +160,13 @@ class Program
   {
     var now = DateTime.Now;
 
-    if (config.DaysOfWeek == null || !config.DaysOfWeek.Any())
+    if (config.BusinessHours.DaysOfWeek == null || !config.BusinessHours.DaysOfWeek.Any())
       return true; // No restrictions if not configured
 
-    if (!config.DaysOfWeek.Contains(now.DayOfWeek.ToString(), StringComparer.OrdinalIgnoreCase))
-     return false;
-    
-    if (now.Hour < config.StartHour || now.Hour >= config.EndHour)
+    if (!config.BusinessHours.DaysOfWeek.Contains(now.DayOfWeek.ToString(), StringComparer.OrdinalIgnoreCase))
+      return false;
+
+    if (now.Hour < config.BusinessHours.StartHour || now.Hour >= config.BusinessHours.EndHour)
       return false;
     
     return true;

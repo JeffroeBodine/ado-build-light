@@ -23,6 +23,9 @@
     <None Include="..\appsettings.json" Condition="Exists('..\appsettings.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\appsettings.example.json" Condition="Exists('..\appsettings.example.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
