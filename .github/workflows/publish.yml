@@ -1,5 +1,9 @@
 name: Publish Artifacts
 
+# Explicit permissions needed so the release action can create a tag/release
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
 
@@ -23,7 +27,7 @@ jobs:
         path: ./artifacts
     - name: Create Release
       id: create_release
-      uses: softprops/action-gh-release@v2.0.9
+      uses: softprops/action-gh-release@v2.3.4
       with:
         tag_name: v${{ github.run_number }}
         body: |
