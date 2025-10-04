@@ -461,7 +461,7 @@ namespace ADOBuildLight.Tests
                 _mockConfig.Object
             );
 
-            mockPipelineService.Verify(x => x.GetLatestPipelineRunAsync(), Times.Once);
+            mockPipelineService.Verify(x => x.GetLatestPipelineRunAsync(), Times.Never);
             mockGpioService.Verify(x => x.SetLightColor(GpioPins.None), Times.Once);
         }
 

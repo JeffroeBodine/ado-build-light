@@ -81,10 +81,10 @@ class Program
         IAppConfiguration config
     )
     {
-        var latestRun = await pipelineService.GetLatestPipelineRunAsync();
-
         if (IsWithinBusinessHours(config))
         {
+            var latestRun = await pipelineService.GetLatestPipelineRunAsync();
+
             var overallStatus = GetOverallStatus(latestRun?.Status, latestRun?.Result);
             Console.WriteLine($"Overall Status: {overallStatus}");
 
