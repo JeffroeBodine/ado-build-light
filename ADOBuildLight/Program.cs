@@ -9,6 +9,17 @@ class Program
 {
   static async Task Main(string[] args)
     {
+        var config = LoadConfiguration();
+        if (config == null)
+        {
+            return;
+        }
+
+        await RunApplicationAsync(config);
+    }
+
+    private static Models.AppConfiguration? LoadConfiguration()
+    {
         IConfigurationRoot configuration;
 
         try
@@ -21,7 +32,7 @@ class Program
         catch (FileNotFoundException fnfex)
         {
             Console.WriteLine($"Configuration file not found. Please copy and modify the `appsettings.json` file. Error: {fnfex.Message}");
-            throw;
+            return null;
         }
 
         var config = new Models.AppConfiguration();
@@ -29,9 +40,14 @@ class Program
         bool validAppSettingsValues = AppSettingsValidation(config);
         if (!validAppSettingsValues)
         {
-            return;
+            return null;
         }
 
+        return config;
+    }
+
+    private static async Task RunApplicationAsync(Models.AppConfiguration config)
+    {
         IPipelineService pipelineService = new PipelineService(config);
         IGpioService? gpioService = CreateGpioService();
         gpioService.Initialize();
@@ -40,22 +56,8 @@ class Program
         {
             while (true)
             {
-                var latestRun = await pipelineService.GetLatestPipelineRunAsync();
-
-                if (IsWithinBusinessHours(config))
-                {
-                    var overallStatus = GetOverallStatus(latestRun?.Status, latestRun?.Result);
-                    Console.WriteLine($"Overall Status: {overallStatus}");
-
-                    UpdateBuildLight(overallStatus, gpioService);
-                }
-                else
-                {
-                    Console.WriteLine($"Outside of business hours. Skipping check. ({DateTime.Now:HH:mm:ss})");
-                    // Optionally turn lights off or set a specific color for "off-duty"
-                    UpdateBuildLight("offduty", gpioService);
-                }
-
+                await ProcessSingleCheckAsync(pipelineService, gpioService, config);
+                
                 Console.WriteLine($"Next check in 1 minute... ({DateTime.Now:HH:mm:ss})");
                 await Task.Delay(TimeSpan.FromMinutes(1));
             }
@@ -68,6 +70,25 @@ class Program
         {
             Console.ForegroundColor = ConsoleColor.White;
             gpioService?.Dispose();
+        }
+    }
+
+    internal static async Task ProcessSingleCheckAsync(IPipelineService pipelineService, IGpioService? gpioService, IAppConfiguration config)
+    {
+        var latestRun = await pipelineService.GetLatestPipelineRunAsync();
+
+        if (IsWithinBusinessHours(config))
+        {
+            var overallStatus = GetOverallStatus(latestRun?.Status, latestRun?.Result);
+            Console.WriteLine($"Overall Status: {overallStatus}");
+
+            UpdateBuildLight(overallStatus, gpioService);
+        }
+        else
+        {
+            Console.WriteLine($"Outside of business hours. Skipping check. ({DateTime.Now:HH:mm:ss})");
+            // Optionally turn lights off or set a specific color for "off-duty"
+            UpdateBuildLight("offduty", gpioService);
         }
     }
 
