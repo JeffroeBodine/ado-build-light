@@ -2,6 +2,7 @@ using NUnit.Framework;
 using ADOBuildLight.Services;
 using System;
 using System.IO;
+using FluentAssertions;
 
 namespace ADOBuildLight.Tests
 {
@@ -29,19 +30,15 @@ namespace ADOBuildLight.Tests
         [Test]
         public void Initialize_WritesExpectedOutput()
         {
-            // Arrange
             var service = new MockGpioService();
-
-            // Act
             service.Initialize();
 
-            // Assert
             var output = _stringWriter.ToString();
-            Assert.That(output, Contains.Substring("[MOCK GPIO] Initializing GPIO pins (simulation mode)"));
-            Assert.That(output, Contains.Substring("[MOCK GPIO] Setting light to: OFF"));
-            Assert.That(output, Contains.Substring("[MOCK GPIO] Setting light to: RED"));
-            Assert.That(output, Contains.Substring("[MOCK GPIO] Setting light to: YELLOW"));
-            Assert.That(output, Contains.Substring("[MOCK GPIO] Setting light to: GREEN"));
+            output.Should().Contain("[MOCK GPIO] Initializing GPIO pins (simulation mode)");
+            output.Should().Contain("[MOCK GPIO] Setting light to: OFF");
+            output.Should().Contain("[MOCK GPIO] Setting light to: RED");
+            output.Should().Contain("[MOCK GPIO] Setting light to: YELLOW");
+            output.Should().Contain("[MOCK GPIO] Setting light to: GREEN");
         }
 
         [TestCase(GpioPins.Red, "RED")]
@@ -51,29 +48,21 @@ namespace ADOBuildLight.Tests
         [TestCase(GpioPins.None, "OFF")]
         public void SetLightColor_WritesExpectedOutput(int color, string expectedColorName)
         {
-            // Arrange
             var service = new MockGpioService();
-
-            // Act
             service.SetLightColor(color);
 
-            // Assert
             var output = _stringWriter.ToString();
-            Assert.That(output, Contains.Substring($"[MOCK GPIO] Setting light to: {expectedColorName}"));
+            output.Should().Contain($"[MOCK GPIO] Setting light to: {expectedColorName}");
         }
 
         [Test]
         public void Dispose_WritesExpectedOutput()
         {
-            // Arrange
             var service = new MockGpioService();
-
-            // Act
             service.Dispose();
 
-            // Assert
             var output = _stringWriter.ToString();
-            Assert.That(output, Contains.Substring("[MOCK GPIO] Disposing GPIO controller (simulation mode)"));
+            output.Should().Contain("[MOCK GPIO] Disposing GPIO controller (simulation mode)");
         }
     }
 }

@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using ADOBuildLight.Models;
+using FluentAssertions;
 
 namespace ADOBuildLight.Tests
 {
@@ -9,7 +10,6 @@ namespace ADOBuildLight.Tests
         [Test]
         public void PipelineRun_Properties_CanBeSet()
         {
-            // Arrange
             var pipelineRun = new PipelineRun();
             var id = 1;
             var name = "Run1";
@@ -19,7 +19,6 @@ namespace ADOBuildLight.Tests
             var finished = DateTime.Now.AddMinutes(10);
             var url = "http://example.com";
 
-            // Act
             pipelineRun.Id = id;
             pipelineRun.Name = name;
             pipelineRun.State = state;
@@ -28,14 +27,13 @@ namespace ADOBuildLight.Tests
             pipelineRun.FinishedDate = finished;
             pipelineRun.Url = url;
 
-            // Assert
-            Assert.That(pipelineRun.Id, Is.EqualTo(id));
-            Assert.That(pipelineRun.Name, Is.EqualTo(name));
-            Assert.That(pipelineRun.State, Is.EqualTo(state));
-            Assert.That(pipelineRun.Result, Is.EqualTo(result));
-            Assert.That(pipelineRun.CreatedDate, Is.EqualTo(created));
-            Assert.That(pipelineRun.FinishedDate, Is.EqualTo(finished));
-            Assert.That(pipelineRun.Url, Is.EqualTo(url));
+            pipelineRun.Id.Should().Be(id);
+            pipelineRun.Name.Should().Be(name);
+            pipelineRun.State.Should().Be(state);
+            pipelineRun.Result.Should().Be(result);
+            pipelineRun.CreatedDate.Should().Be(created);
+            pipelineRun.FinishedDate.Should().Be(finished);
+            pipelineRun.Url.Should().Be(url);
         }
     }
 }

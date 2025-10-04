@@ -22,15 +22,12 @@ namespace ADOBuildLight.Tests
         [Test]
         public void Initialize_OpensPinsAndRunsTestSequence()
         {
-            // Act
             _service.Initialize();
 
-            // Assert
             _mockController.Verify(c => c.OpenPin(GpioPins.Red, PinMode.Output), Times.Once);
             _mockController.Verify(c => c.OpenPin(GpioPins.Yellow, PinMode.Output), Times.Once);
             _mockController.Verify(c => c.OpenPin(GpioPins.Green, PinMode.Output), Times.Once);
 
-            // Verify the test sequence calls
             _mockController.Verify(c => c.Write(GpioPins.Red, PinValue.High), Times.AtLeastOnce());
             _mockController.Verify(c => c.Write(GpioPins.Yellow, PinValue.High), Times.AtLeastOnce());
             _mockController.Verify(c => c.Write(GpioPins.Green, PinValue.High), Times.AtLeastOnce());
@@ -43,13 +40,10 @@ namespace ADOBuildLight.Tests
         [TestCase(GpioPins.None, 1, 1, 1)]
         public void SetLightColor_WritesCorrectPinValues(int color, int red, int yellow, int green)
         {
-            // Arrange
             _service.Initialize(); // To open pins
 
-            // Act
             _service.SetLightColor(color);
 
-            // Assert
             _mockController.Verify(c => c.Write(GpioPins.Red, (PinValue)red), Times.AtLeastOnce());
             _mockController.Verify(c => c.Write(GpioPins.Yellow, (PinValue)yellow), Times.AtLeastOnce());
             _mockController.Verify(c => c.Write(GpioPins.Green, (PinValue)green), Times.AtLeastOnce());
@@ -58,10 +52,8 @@ namespace ADOBuildLight.Tests
         [Test]
         public void Dispose_DisposesController()
         {
-            // Act
             _service.Dispose();
 
-            // Assert
             _mockController.Verify(c => c.Dispose(), Times.Once);
         }
     }

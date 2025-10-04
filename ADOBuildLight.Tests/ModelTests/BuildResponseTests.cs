@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using ADOBuildLight.Models;
+using FluentAssertions;
 
 namespace ADOBuildLight.Tests
 {
@@ -13,27 +14,19 @@ namespace ADOBuildLight.Tests
         [TestCase("canceled")]
         public void BuildResponse_Result_CanBeSet(string result)
         {
-            // Arrange
             var buildResponse = new BuildResponse();
-
-            // Act
             buildResponse.Result = result;
 
-            // Assert
-            Assert.That(buildResponse.Result, Is.EqualTo(result));
+            buildResponse.Result.Should().Be(result);
         }
 
         [Test]
         public void BuildResponse_Result_CanBeSetToNull()
         {
-            // Arrange
             var buildResponse = new BuildResponse();
-
-            // Act
             buildResponse.Result = null;
 
-            // Assert
-            Assert.That(buildResponse.Result, Is.Null);
+            buildResponse.Result.Should().BeNull();
         }
 
         [TestCase("none")]
@@ -45,14 +38,10 @@ namespace ADOBuildLight.Tests
         [TestCase("all")]
         public void BuildResponse_Status_CanBeSet(string status)
         {
-            // Arrange
             var buildResponse = new BuildResponse();
-
-            // Act
             buildResponse.Status = status;
 
-            // Assert
-            Assert.That(buildResponse.Status, Is.EqualTo(status));
+            buildResponse.Status.Should().Be(status);
         }
     }
 }
