@@ -6,7 +6,7 @@ using FluentAssertions;
 namespace ADOBuildLight.Tests.ServiceTests
 {
     [TestFixture]
-    [Ignore("Verifying if there is an issue with these tests in CI")]
+    // [Ignore("Verifying if there is an issue with these tests in CI")]
     public class RealGpioControllerAdapterTests
     {
         [Test]
@@ -170,6 +170,9 @@ namespace ADOBuildLight.Tests.ServiceTests
         {
             // Check if we're on a platform that supports GPIO
             // This is a simple heuristic - in practice, you might want more sophisticated detection
+            Console.WriteLine("Checking if GPIO is supported on this platform...");
+            Console.WriteLine($"Platform: {Environment.OSVersion.Platform}");
+            Console.WriteLine($"Model file exists: {File.Exists("/proc/device-tree/model")}");
             return Environment.OSVersion.Platform == PlatformID.Unix && File.Exists("/proc/device-tree/model");
         }
     }
