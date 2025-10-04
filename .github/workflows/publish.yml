@@ -19,12 +19,23 @@ jobs:
         dotnet-version: 9.0.x
     - name: Publish
       run: dotnet publish ./ADOBuildLight/ --configuration Release --output ./artifacts
-      
-    - name: Upload a Build Artifact
+    
+    - name: Package artifacts (zip)
+      run: |
+        VERSION="v${{ github.run_number }}"
+        ZIP_NAME="ado-build-light-${VERSION}.zip"
+        # Ensure deterministic ordering and preserve executable bits if any
+        (cd artifacts && zip -r "../${ZIP_NAME}" .)
+        echo "Created ${ZIP_NAME}" && ls -l ${ZIP_NAME}
+        echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+
+    - name: Upload zipped artifact
       uses: actions/upload-artifact@v4.3.4
       with:
-        name: ado-build-light
-        path: ./artifacts
+        name: ado-build-light-zip
+        path: ./ado-build-light-v${{ github.run_number }}.zip
+        if-no-files-found: error
+        
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v2.3.4
@@ -32,4 +43,5 @@ jobs:
         tag_name: v${{ github.run_number }}
         body: |
           Automated release for build ${{ github.run_number }}
-        files: ./artifacts/*
+        files: |
+          ./ado-build-light-v${{ github.run_number }}.zip

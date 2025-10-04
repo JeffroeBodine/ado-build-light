@@ -35,6 +35,9 @@
 *.log
 logs/
 
+# Artifacts
+artifacts/
+
 # User secrets (keep secrets out of repo)
 secrets.json
 **/secrets.json
