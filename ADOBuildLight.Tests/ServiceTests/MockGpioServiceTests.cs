@@ -15,6 +15,8 @@ namespace ADOBuildLight.Tests
         [SetUp]
         public void Setup()
         {
+            // Skip any artificial delays for faster tests
+            RealGpioService.SkipStartupDelays = true;
             _stringWriter = new StringWriter();
             _originalOutput = Console.Out;
             Console.SetOut(_stringWriter);

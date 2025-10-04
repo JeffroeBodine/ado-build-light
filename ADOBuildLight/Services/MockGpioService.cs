@@ -11,13 +11,13 @@ public class MockGpioService : IGpioService
     
     // Simulate test sequence
     SetLightColor(GpioPins.None);
-    Thread.Sleep(100); // Shorter delays for mock
+    Sleep(100); // Shorter delays for mock
     SetLightColor(GpioPins.Red);
-    Thread.Sleep(100);
+    Sleep(100);
     SetLightColor(GpioPins.Yellow);
-    Thread.Sleep(100);
+    Sleep(100);
     SetLightColor(GpioPins.Green);
-    Thread.Sleep(100);
+    Sleep(100);
   }
 
   public void SetLightColor(int color)
@@ -36,5 +36,12 @@ public class MockGpioService : IGpioService
   public void Dispose()
   {
     Console.WriteLine("[MOCK GPIO] Disposing GPIO controller (simulation mode)");
+  }
+
+  private static void Sleep(int ms)
+  {
+    if (Services.RealGpioService.SkipStartupDelays)
+      return;
+    Thread.Sleep(ms);
   }
 }

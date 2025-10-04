@@ -7,6 +7,8 @@ namespace ADOBuildLight.Services;
 public class RealGpioService : IGpioService
 {
   private readonly IGpioController _controller;
+  // Allows tests to skip the startup delay sequence for faster execution
+  public static bool SkipStartupDelays { get; set; } = false;
 
   public RealGpioService(IGpioController controller)
   {
@@ -21,14 +23,21 @@ public class RealGpioService : IGpioService
 
     // Test sequence
     SetLightColor(GpioPins.None);
-    Thread.Sleep(500);
+    Sleep(500);
     SetLightColor(GpioPins.Red);
-    Thread.Sleep(500);
+    Sleep(500);
     SetLightColor(GpioPins.Yellow);
-    Thread.Sleep(500);
+    Sleep(500);
     SetLightColor(GpioPins.Green);
-    Thread.Sleep(500);
+    Sleep(500);
     _controller.Write(GpioPins.Green, PinValue.High);
+  }
+
+  private static void Sleep(int ms)
+  {
+    if (SkipStartupDelays)
+      return;
+    Thread.Sleep(ms);
   }
 
   public void SetLightColor(int color)

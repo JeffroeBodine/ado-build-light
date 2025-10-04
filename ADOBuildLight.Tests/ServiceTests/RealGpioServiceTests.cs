@@ -15,6 +15,8 @@ namespace ADOBuildLight.Tests
         [SetUp]
         public void Setup()
         {
+            // Skip startup delays to speed up tests
+            RealGpioService.SkipStartupDelays = true;
             _mockController = new Mock<IGpioController>();
             _service = new RealGpioService(_mockController.Object);
         }
