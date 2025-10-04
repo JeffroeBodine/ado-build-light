@@ -31,12 +31,3 @@ jobs:
         dotnet-version: 9.0.x
     - name: Test
       run: dotnet test --verbosity normal --collect:"XPlat Code Coverage" --logger trx --results-directory coverage
-    - name: Code Coverage Summary Report
-      uses: irongut/CodeCoverageSummary@v1.3.0
-      with:
-        filename: 'coverage/*/coverage.cobertura.xml'
-        badge: true
-        format: 'markdown'
-        output: 'both'
-    - name: Write to Job Summary
-      run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
