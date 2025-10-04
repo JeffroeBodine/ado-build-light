@@ -10,11 +10,10 @@ public class PipelineService : IPipelineService
 {
     private readonly HttpClient _httpClient;
     private readonly IAppConfiguration _config;
-    
-    public PipelineService(IAppConfiguration config) : this(config, new HttpClient())
-    {
-    }
-    
+
+    public PipelineService(IAppConfiguration config)
+        : this(config, new HttpClient()) { }
+
     public PipelineService(IAppConfiguration config, HttpClient httpClient)
     {
         _httpClient = httpClient;
@@ -23,19 +22,28 @@ public class PipelineService : IPipelineService
 
     public async Task<BuildResponse?> GetLatestPipelineRunAsync()
     {
-        var url = $"https://dev.azure.com/{_config.AzureDevOps.Organization}/{_config.AzureDevOps.Project}/_apis/pipelines/{_config.AzureDevOps.PipelineId}/runs?api-version=7.1-preview.1";
+        var url =
+            $"https://dev.azure.com/{_config.AzureDevOps.Organization}/{_config.AzureDevOps.Project}/_apis/pipelines/{_config.AzureDevOps.PipelineId}/runs?api-version=7.1-preview.1";
 
         _httpClient.DefaultRequestHeaders.Accept.Clear();
-        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-            Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_config.AzureDevOps.PersonalAccessToken}")));
+        _httpClient.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json")
+        );
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Basic",
+            Convert.ToBase64String(
+                Encoding.ASCII.GetBytes($":{_config.AzureDevOps.PersonalAccessToken}")
+            )
+        );
 
         try
         {
             var response = await _httpClient.GetStringAsync(url);
             var pipelineRuns = JsonSerializer.Deserialize<PipelineRunsResponse>(response);
 
-            var mostRecentBuild = pipelineRuns?.Value.OrderByDescending(r => r.CreatedDate).FirstOrDefault();
+            var mostRecentBuild = pipelineRuns
+                ?.Value.OrderByDescending(r => r.CreatedDate)
+                .FirstOrDefault();
 
             if (mostRecentBuild == null)
             {
@@ -54,12 +62,19 @@ public class PipelineService : IPipelineService
 
     private async Task<BuildResponse?> CheckBuildDetailsAsync(int buildId)
     {
-        var url = $"https://dev.azure.com/{_config.AzureDevOps.Organization}/{_config.AzureDevOps.Project}/_apis/build/builds/{buildId}?api-version=7.1";
+        var url =
+            $"https://dev.azure.com/{_config.AzureDevOps.Organization}/{_config.AzureDevOps.Project}/_apis/build/builds/{buildId}?api-version=7.1";
 
         _httpClient.DefaultRequestHeaders.Accept.Clear();
-        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-            Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_config.AzureDevOps.PersonalAccessToken}")));
+        _httpClient.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json")
+        );
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Basic",
+            Convert.ToBase64String(
+                Encoding.ASCII.GetBytes($":{_config.AzureDevOps.PersonalAccessToken}")
+            )
+        );
 
         try
         {

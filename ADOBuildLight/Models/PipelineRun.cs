@@ -24,5 +24,4 @@ public class PipelineRun
 
     [JsonPropertyName("url")]
     public string Url { get; set; } = string.Empty;
-
 }

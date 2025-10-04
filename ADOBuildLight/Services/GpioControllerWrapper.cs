@@ -7,9 +7,8 @@ namespace ADOBuildLight.Services
     {
         private readonly IGpioControllerInternal _controller;
 
-        public GpioControllerWrapper() : this(new RealGpioControllerAdapter())
-        {
-        }
+        public GpioControllerWrapper()
+            : this(new RealGpioControllerAdapter()) { }
 
         public GpioControllerWrapper(IGpioControllerInternal controller)
         {

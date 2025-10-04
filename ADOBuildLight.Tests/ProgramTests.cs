@@ -1,11 +1,11 @@
+using System.Reflection;
 using System.Runtime.InteropServices;
-using NUnit.Framework;
+using ADOBuildLight.Interfaces;
+using ADOBuildLight.Models;
+using ADOBuildLight.Services;
 using FluentAssertions;
 using Moq;
-using ADOBuildLight.Interfaces;
-using ADOBuildLight.Services;
-using ADOBuildLight.Models;
-using System.Reflection;
+using NUnit.Framework;
 
 namespace ADOBuildLight.Tests
 {
@@ -34,14 +34,14 @@ namespace ADOBuildLight.Tests
                     Organization = "test-org",
                     Project = "test-project",
                     PipelineId = "123",
-                    PersonalAccessToken = "test-token"
+                    PersonalAccessToken = "test-token",
                 },
                 BusinessHours = new AppConfiguration.BusinessHoursSettings
                 {
                     StartHour = 8,
                     EndHour = 17,
-                    DaysOfWeek = new List<string> { "Monday", "Tuesday", "Wednesday" }
-                }
+                    DaysOfWeek = new List<string> { "Monday", "Tuesday", "Wednesday" },
+                },
             };
 
             var result = InvokePrivateStaticMethod<bool>("AppSettingsValidation", config);
@@ -53,7 +53,12 @@ namespace ADOBuildLight.Tests
         [TestCase("test-org", "", "123", "test-token", TestName = "EmptyProject")]
         [TestCase("test-org", "test-project", "", "test-token", TestName = "EmptyPipelineId")]
         [TestCase("test-org", "test-project", "123", "", TestName = "EmptyPersonalAccessToken")]
-        public void AppSettingsValidation_WithMissingAzureDevOpsSettings_ReturnsFalse(string organization, string project, string pipelineId, string token)
+        public void AppSettingsValidation_WithMissingAzureDevOpsSettings_ReturnsFalse(
+            string organization,
+            string project,
+            string pipelineId,
+            string token
+        )
         {
             var config = new AppConfiguration
             {
@@ -62,14 +67,14 @@ namespace ADOBuildLight.Tests
                     Organization = organization,
                     Project = project,
                     PipelineId = pipelineId,
-                    PersonalAccessToken = token
+                    PersonalAccessToken = token,
                 },
                 BusinessHours = new AppConfiguration.BusinessHoursSettings
                 {
                     StartHour = 8,
                     EndHour = 17,
-                    DaysOfWeek = new List<string> { "Monday", "Tuesday" }
-                }
+                    DaysOfWeek = new List<string> { "Monday", "Tuesday" },
+                },
             };
 
             var result = InvokePrivateStaticMethod<bool>("AppSettingsValidation", config);
@@ -80,7 +85,11 @@ namespace ADOBuildLight.Tests
         [TestCase(8, 17, new[] { "Monday" }, TestName = "OneDayOfWeek")]
         [TestCase(0, 17, new[] { "Monday", "Tuesday" }, TestName = "ZeroStartHour")]
         [TestCase(8, 0, new[] { "Monday", "Tuesday" }, TestName = "ZeroEndHour")]
-        public void AppSettingsValidation_WithInvalidBusinessHours_ReturnsFalse(int startHour, int endHour, string[] daysOfWeek)
+        public void AppSettingsValidation_WithInvalidBusinessHours_ReturnsFalse(
+            int startHour,
+            int endHour,
+            string[] daysOfWeek
+        )
         {
             var config = new AppConfiguration
             {
@@ -89,14 +98,14 @@ namespace ADOBuildLight.Tests
                     Organization = "test-org",
                     Project = "test-project",
                     PipelineId = "123",
-                    PersonalAccessToken = "test-token"
+                    PersonalAccessToken = "test-token",
                 },
                 BusinessHours = new AppConfiguration.BusinessHoursSettings
                 {
                     StartHour = startHour,
                     EndHour = endHour,
-                    DaysOfWeek = daysOfWeek.ToList()
-                }
+                    DaysOfWeek = daysOfWeek.ToList(),
+                },
             };
 
             var result = InvokePrivateStaticMethod<bool>("AppSettingsValidation", config);
@@ -138,7 +147,11 @@ namespace ADOBuildLight.Tests
         [TestCase("completed", "succeeded", "succeeded")]
         [TestCase("completed", "failed", "failed")]
         [TestCase("PENDING", "succeeded", "pending")]
-        public void GetOverallStatus_WithVariousStates_ReturnsExpectedResult(string state, string result, string expected)
+        public void GetOverallStatus_WithVariousStates_ReturnsExpectedResult(
+            string state,
+            string result,
+            string expected
+        )
         {
             var actualResult = InvokePrivateStaticMethod<string>("GetOverallStatus", state, result);
 
@@ -149,8 +162,12 @@ namespace ADOBuildLight.Tests
         public void GetOverallStatus_WithCompletedStateAndNullResult_ReturnsUnknown()
         {
             string? nullResult = null;
-            
-            var result = InvokePrivateStaticMethod<string>("GetOverallStatus", "completed", nullResult);
+
+            var result = InvokePrivateStaticMethod<string>(
+                "GetOverallStatus",
+                "completed",
+                nullResult
+            );
 
             result.Should().Be("unknown");
         }
@@ -159,8 +176,12 @@ namespace ADOBuildLight.Tests
         public void GetOverallStatus_WithNullState_ReturnsUnknown()
         {
             string? nullState = null;
-            
-            var result = InvokePrivateStaticMethod<string>("GetOverallStatus", nullState, "succeeded");
+
+            var result = InvokePrivateStaticMethod<string>(
+                "GetOverallStatus",
+                nullState,
+                "succeeded"
+            );
 
             result.Should().Be("unknown");
         }
@@ -179,7 +200,10 @@ namespace ADOBuildLight.Tests
         [TestCase("cancelled", GpioPins.Red)]
         [TestCase("offduty", GpioPins.None)]
         [TestCase("unknown-status", GpioPins.None)]
-        public void UpdateBuildLight_WithVariousStatuses_SetsCorrectLight(string status, int expectedPin)
+        public void UpdateBuildLight_WithVariousStatuses_SetsCorrectLight(
+            string status,
+            int expectedPin
+        )
         {
             var mockGpioService = new Mock<IGpioService>();
 
@@ -192,9 +216,13 @@ namespace ADOBuildLight.Tests
         public void UpdateBuildLight_WithNullGpioService_DoesNotThrow()
         {
             IGpioService? nullGpioService = null;
-            
-            FluentActions.Invoking(() => InvokePrivateStaticMethod("UpdateBuildLight", "succeeded", nullGpioService))
-                .Should().NotThrow();
+
+            FluentActions
+                .Invoking(() =>
+                    InvokePrivateStaticMethod("UpdateBuildLight", "succeeded", nullGpioService)
+                )
+                .Should()
+                .NotThrow();
         }
 
         #endregion
@@ -208,12 +236,15 @@ namespace ADOBuildLight.Tests
             {
                 DaysOfWeek = null!,
                 StartHour = 8,
-                EndHour = 17
+                EndHour = 17,
             };
-            
+
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            var result = InvokePrivateStaticMethod<bool>("IsWithinBusinessHours", _mockConfig.Object);
+            var result = InvokePrivateStaticMethod<bool>(
+                "IsWithinBusinessHours",
+                _mockConfig.Object
+            );
 
             result.Should().BeTrue();
         }
@@ -225,12 +256,15 @@ namespace ADOBuildLight.Tests
             {
                 DaysOfWeek = new List<string>(),
                 StartHour = 8,
-                EndHour = 17
+                EndHour = 17,
             };
-            
+
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            var result = InvokePrivateStaticMethod<bool>("IsWithinBusinessHours", _mockConfig.Object);
+            var result = InvokePrivateStaticMethod<bool>(
+                "IsWithinBusinessHours",
+                _mockConfig.Object
+            );
 
             result.Should().BeTrue();
         }
@@ -239,18 +273,24 @@ namespace ADOBuildLight.Tests
         public void IsWithinBusinessHours_CurrentDayNotInList_ReturnsFalse()
         {
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
-            var otherDays = Enum.GetNames<DayOfWeek>().Where(d => d != currentDayOfWeek).Take(2).ToList();
-            
+            var otherDays = Enum.GetNames<DayOfWeek>()
+                .Where(d => d != currentDayOfWeek)
+                .Take(2)
+                .ToList();
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = otherDays,
                 StartHour = 8,
-                EndHour = 17
+                EndHour = 17,
             };
-            
+
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            var result = InvokePrivateStaticMethod<bool>("IsWithinBusinessHours", _mockConfig.Object);
+            var result = InvokePrivateStaticMethod<bool>(
+                "IsWithinBusinessHours",
+                _mockConfig.Object
+            );
 
             result.Should().BeFalse();
         }
@@ -260,17 +300,20 @@ namespace ADOBuildLight.Tests
         {
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
             var currentHour = DateTime.Now.Hour;
-            
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = new List<string> { currentDayOfWeek },
                 StartHour = Math.Max(0, currentHour - 1),
-                EndHour = currentHour + 2
+                EndHour = currentHour + 2,
             };
-            
+
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            var result = InvokePrivateStaticMethod<bool>("IsWithinBusinessHours", _mockConfig.Object);
+            var result = InvokePrivateStaticMethod<bool>(
+                "IsWithinBusinessHours",
+                _mockConfig.Object
+            );
 
             result.Should().BeTrue();
         }
@@ -280,17 +323,20 @@ namespace ADOBuildLight.Tests
         {
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
             var currentHour = DateTime.Now.Hour;
-            
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = new List<string> { currentDayOfWeek },
                 StartHour = currentHour + 1,
-                EndHour = currentHour + 3
+                EndHour = currentHour + 3,
             };
-            
+
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            var result = InvokePrivateStaticMethod<bool>("IsWithinBusinessHours", _mockConfig.Object);
+            var result = InvokePrivateStaticMethod<bool>(
+                "IsWithinBusinessHours",
+                _mockConfig.Object
+            );
 
             result.Should().BeFalse();
         }
@@ -300,17 +346,20 @@ namespace ADOBuildLight.Tests
         {
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
             var currentHour = DateTime.Now.Hour;
-            
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = new List<string> { currentDayOfWeek },
                 StartHour = Math.Max(0, currentHour - 2),
-                EndHour = currentHour
+                EndHour = currentHour,
             };
-            
+
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            var result = InvokePrivateStaticMethod<bool>("IsWithinBusinessHours", _mockConfig.Object);
+            var result = InvokePrivateStaticMethod<bool>(
+                "IsWithinBusinessHours",
+                _mockConfig.Object
+            );
 
             result.Should().BeFalse();
         }
@@ -320,17 +369,20 @@ namespace ADOBuildLight.Tests
         {
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString().ToUpper();
             var currentHour = DateTime.Now.Hour;
-            
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = new List<string> { currentDayOfWeek },
                 StartHour = Math.Max(0, currentHour - 1),
-                EndHour = currentHour + 2
+                EndHour = currentHour + 2,
             };
-            
+
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            var result = InvokePrivateStaticMethod<bool>("IsWithinBusinessHours", _mockConfig.Object);
+            var result = InvokePrivateStaticMethod<bool>(
+                "IsWithinBusinessHours",
+                _mockConfig.Object
+            );
 
             result.Should().BeTrue();
         }
@@ -344,19 +396,30 @@ namespace ADOBuildLight.Tests
         {
             var mockPipelineService = new Mock<IPipelineService>();
             var mockGpioService = new Mock<IGpioService>();
-            var mockBuildResponse = new BuildResponse { Status = "completed", Result = "succeeded" };
-            
-            mockPipelineService.Setup(x => x.GetLatestPipelineRunAsync()).ReturnsAsync(mockBuildResponse);
-            
+            var mockBuildResponse = new BuildResponse
+            {
+                Status = "completed",
+                Result = "succeeded",
+            };
+
+            mockPipelineService
+                .Setup(x => x.GetLatestPipelineRunAsync())
+                .ReturnsAsync(mockBuildResponse);
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = new List<string> { DateTime.Now.DayOfWeek.ToString() },
                 StartHour = Math.Max(0, DateTime.Now.Hour - 1),
-                EndHour = DateTime.Now.Hour + 2
+                EndHour = DateTime.Now.Hour + 2,
             };
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            await InvokePrivateStaticMethodAsync("ProcessSingleCheckAsync", mockPipelineService.Object, mockGpioService.Object, _mockConfig.Object);
+            await InvokePrivateStaticMethodAsync(
+                "ProcessSingleCheckAsync",
+                mockPipelineService.Object,
+                mockGpioService.Object,
+                _mockConfig.Object
+            );
 
             mockPipelineService.Verify(x => x.GetLatestPipelineRunAsync(), Times.Once);
             mockGpioService.Verify(x => x.SetLightColor(GpioPins.Green), Times.Once);
@@ -367,22 +430,36 @@ namespace ADOBuildLight.Tests
         {
             var mockPipelineService = new Mock<IPipelineService>();
             var mockGpioService = new Mock<IGpioService>();
-            var mockBuildResponse = new BuildResponse { Status = "completed", Result = "succeeded" };
-            
-            mockPipelineService.Setup(x => x.GetLatestPipelineRunAsync()).ReturnsAsync(mockBuildResponse);
-            
+            var mockBuildResponse = new BuildResponse
+            {
+                Status = "completed",
+                Result = "succeeded",
+            };
+
+            mockPipelineService
+                .Setup(x => x.GetLatestPipelineRunAsync())
+                .ReturnsAsync(mockBuildResponse);
+
             var currentDayOfWeek = DateTime.Now.DayOfWeek.ToString();
-            var otherDays = Enum.GetNames<DayOfWeek>().Where(d => d != currentDayOfWeek).Take(2).ToList();
-            
+            var otherDays = Enum.GetNames<DayOfWeek>()
+                .Where(d => d != currentDayOfWeek)
+                .Take(2)
+                .ToList();
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = otherDays,
                 StartHour = 9,
-                EndHour = 17
+                EndHour = 17,
             };
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            await InvokePrivateStaticMethodAsync("ProcessSingleCheckAsync", mockPipelineService.Object, mockGpioService.Object, _mockConfig.Object);
+            await InvokePrivateStaticMethodAsync(
+                "ProcessSingleCheckAsync",
+                mockPipelineService.Object,
+                mockGpioService.Object,
+                _mockConfig.Object
+            );
 
             mockPipelineService.Verify(x => x.GetLatestPipelineRunAsync(), Times.Once);
             mockGpioService.Verify(x => x.SetLightColor(GpioPins.None), Times.Once);
@@ -393,18 +470,25 @@ namespace ADOBuildLight.Tests
         {
             var mockPipelineService = new Mock<IPipelineService>();
             var mockGpioService = new Mock<IGpioService>();
-            
-            mockPipelineService.Setup(x => x.GetLatestPipelineRunAsync()).ReturnsAsync((BuildResponse?)null);
-            
+
+            mockPipelineService
+                .Setup(x => x.GetLatestPipelineRunAsync())
+                .ReturnsAsync((BuildResponse?)null);
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = new List<string> { DateTime.Now.DayOfWeek.ToString() },
                 StartHour = Math.Max(0, DateTime.Now.Hour - 1),
-                EndHour = DateTime.Now.Hour + 2
+                EndHour = DateTime.Now.Hour + 2,
             };
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            await InvokePrivateStaticMethodAsync("ProcessSingleCheckAsync", mockPipelineService.Object, mockGpioService.Object, _mockConfig.Object);
+            await InvokePrivateStaticMethodAsync(
+                "ProcessSingleCheckAsync",
+                mockPipelineService.Object,
+                mockGpioService.Object,
+                _mockConfig.Object
+            );
 
             mockPipelineService.Verify(x => x.GetLatestPipelineRunAsync(), Times.Once);
             mockGpioService.Verify(x => x.SetLightColor(GpioPins.None), Times.Once);
@@ -416,18 +500,25 @@ namespace ADOBuildLight.Tests
             var mockPipelineService = new Mock<IPipelineService>();
             var mockGpioService = new Mock<IGpioService>();
             var mockBuildResponse = new BuildResponse { Status = "inProgress", Result = null };
-            
-            mockPipelineService.Setup(x => x.GetLatestPipelineRunAsync()).ReturnsAsync(mockBuildResponse);
-            
+
+            mockPipelineService
+                .Setup(x => x.GetLatestPipelineRunAsync())
+                .ReturnsAsync(mockBuildResponse);
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = new List<string> { DateTime.Now.DayOfWeek.ToString() },
                 StartHour = Math.Max(0, DateTime.Now.Hour - 1),
-                EndHour = DateTime.Now.Hour + 2
+                EndHour = DateTime.Now.Hour + 2,
             };
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            await InvokePrivateStaticMethodAsync("ProcessSingleCheckAsync", mockPipelineService.Object, mockGpioService.Object, _mockConfig.Object);
+            await InvokePrivateStaticMethodAsync(
+                "ProcessSingleCheckAsync",
+                mockPipelineService.Object,
+                mockGpioService.Object,
+                _mockConfig.Object
+            );
 
             mockPipelineService.Verify(x => x.GetLatestPipelineRunAsync(), Times.Once);
             mockGpioService.Verify(x => x.SetLightColor(GpioPins.Yellow), Times.Once);
@@ -436,23 +527,34 @@ namespace ADOBuildLight.Tests
         [TestCase("completed", "failed", GpioPins.Red)]
         [TestCase("completed", "partiallysucceeded", GpioPins.Orange)]
         [TestCase("completed", "succeeded", GpioPins.Green)]
-        public async Task ProcessSingleCheckAsync_WithVariousBuildResults_SetsCorrectLight(string status, string result, int expectedPin)
+        public async Task ProcessSingleCheckAsync_WithVariousBuildResults_SetsCorrectLight(
+            string status,
+            string result,
+            int expectedPin
+        )
         {
             var mockPipelineService = new Mock<IPipelineService>();
             var mockGpioService = new Mock<IGpioService>();
             var mockBuildResponse = new BuildResponse { Status = status, Result = result };
-            
-            mockPipelineService.Setup(x => x.GetLatestPipelineRunAsync()).ReturnsAsync(mockBuildResponse);
-            
+
+            mockPipelineService
+                .Setup(x => x.GetLatestPipelineRunAsync())
+                .ReturnsAsync(mockBuildResponse);
+
             var businessHours = new AppConfiguration.BusinessHoursSettings
             {
                 DaysOfWeek = new List<string> { DateTime.Now.DayOfWeek.ToString() },
                 StartHour = Math.Max(0, DateTime.Now.Hour - 1),
-                EndHour = DateTime.Now.Hour + 2
+                EndHour = DateTime.Now.Hour + 2,
             };
             _mockConfig.Setup(x => x.BusinessHours).Returns(businessHours);
 
-            await InvokePrivateStaticMethodAsync("ProcessSingleCheckAsync", mockPipelineService.Object, mockGpioService.Object, _mockConfig.Object);
+            await InvokePrivateStaticMethodAsync(
+                "ProcessSingleCheckAsync",
+                mockPipelineService.Object,
+                mockGpioService.Object,
+                _mockConfig.Object
+            );
 
             mockGpioService.Verify(x => x.SetLightColor(expectedPin), Times.Once);
         }
@@ -467,51 +569,73 @@ namespace ADOBuildLight.Tests
             // This test would require setting up a temporary appsettings.json file
             // For now, we'll test the validation logic that's part of LoadConfiguration
             var result = InvokePrivateStaticMethod<Models.AppConfiguration?>("LoadConfiguration");
-            
+
             // The result will be null on Windows without appsettings.json, which is expected
             // This test mainly ensures the method doesn't throw exceptions
-            FluentActions.Invoking(() => InvokePrivateStaticMethod<Models.AppConfiguration?>("LoadConfiguration"))
-                .Should().NotThrow();
+            FluentActions
+                .Invoking(() =>
+                    InvokePrivateStaticMethod<Models.AppConfiguration?>("LoadConfiguration")
+                )
+                .Should()
+                .NotThrow();
         }
 
         #endregion
 
         #region Helper Methods
 
-        private static T InvokePrivateStaticMethod<T>(string methodName, params object?[] parameters)
+        private static T InvokePrivateStaticMethod<T>(
+            string methodName,
+            params object?[] parameters
+        )
         {
             var assembly = Assembly.Load("ADOBuildLight");
             var programType = assembly.GetType("ADOBuildLight.Program");
             programType.Should().NotBeNull("Program type should exist");
-            
-            var method = programType!.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
+
+            var method = programType!.GetMethod(
+                methodName,
+                BindingFlags.NonPublic | BindingFlags.Static
+            );
             method.Should().NotBeNull($"Method {methodName} should exist");
-            
+
             var result = method!.Invoke(null, parameters);
             return (T)result!;
         }
 
-        private static void InvokePrivateStaticMethod(string methodName, params object?[] parameters)
+        private static void InvokePrivateStaticMethod(
+            string methodName,
+            params object?[] parameters
+        )
         {
             var assembly = Assembly.Load("ADOBuildLight");
             var programType = assembly.GetType("ADOBuildLight.Program");
             programType.Should().NotBeNull("Program type should exist");
-            
-            var method = programType!.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
+
+            var method = programType!.GetMethod(
+                methodName,
+                BindingFlags.NonPublic | BindingFlags.Static
+            );
             method.Should().NotBeNull($"Method {methodName} should exist");
-            
+
             method!.Invoke(null, parameters);
         }
 
-        private static async Task InvokePrivateStaticMethodAsync(string methodName, params object?[] parameters)
+        private static async Task InvokePrivateStaticMethodAsync(
+            string methodName,
+            params object?[] parameters
+        )
         {
             var assembly = Assembly.Load("ADOBuildLight");
             var programType = assembly.GetType("ADOBuildLight.Program");
             programType.Should().NotBeNull("Program type should exist");
-            
-            var method = programType!.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
+
+            var method = programType!.GetMethod(
+                methodName,
+                BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public
+            );
             method.Should().NotBeNull($"Method {methodName} should exist");
-            
+
             var result = method!.Invoke(null, parameters);
             if (result is Task task)
             {

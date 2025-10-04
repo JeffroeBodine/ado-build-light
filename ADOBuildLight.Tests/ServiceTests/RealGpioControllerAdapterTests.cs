@@ -1,7 +1,7 @@
-using NUnit.Framework;
-using ADOBuildLight.Services;
 using System.Device.Gpio;
+using ADOBuildLight.Services;
 using FluentAssertions;
+using NUnit.Framework;
 
 namespace ADOBuildLight.Tests.ServiceTests
 {
@@ -28,8 +28,10 @@ namespace ADOBuildLight.Tests.ServiceTests
             {
                 // On supported platforms, verify it doesn't throw
                 var adapter = new RealGpioControllerAdapter();
-                FluentActions.Invoking(() => adapter.OpenPin(27, PinMode.Output))
-                    .Should().NotThrow();
+                FluentActions
+                    .Invoking(() => adapter.OpenPin(27, PinMode.Output))
+                    .Should()
+                    .NotThrow();
                 adapter.Dispose();
             }
         }
@@ -42,8 +44,7 @@ namespace ADOBuildLight.Tests.ServiceTests
                 // On supported platforms, verify it doesn't throw
                 var adapter = new RealGpioControllerAdapter();
                 adapter.OpenPin(27, PinMode.Output);
-                FluentActions.Invoking(() => adapter.Write(27, PinValue.High))
-                    .Should().NotThrow();
+                FluentActions.Invoking(() => adapter.Write(27, PinValue.High)).Should().NotThrow();
                 adapter.Dispose();
             }
         }
@@ -66,9 +67,18 @@ namespace ADOBuildLight.Tests.ServiceTests
                 var adapter = new RealGpioControllerAdapter();
 
                 // Test different pin modes
-                FluentActions.Invoking(() => adapter.OpenPin(18, PinMode.Output)).Should().NotThrow();
-                FluentActions.Invoking(() => adapter.OpenPin(19, PinMode.Input)).Should().NotThrow();
-                FluentActions.Invoking(() => adapter.OpenPin(20, PinMode.InputPullUp)).Should().NotThrow();
+                FluentActions
+                    .Invoking(() => adapter.OpenPin(18, PinMode.Output))
+                    .Should()
+                    .NotThrow();
+                FluentActions
+                    .Invoking(() => adapter.OpenPin(19, PinMode.Input))
+                    .Should()
+                    .NotThrow();
+                FluentActions
+                    .Invoking(() => adapter.OpenPin(20, PinMode.InputPullUp))
+                    .Should()
+                    .NotThrow();
 
                 adapter.Dispose();
             }
@@ -98,14 +108,17 @@ namespace ADOBuildLight.Tests.ServiceTests
                 var adapter = new RealGpioControllerAdapter();
 
                 // Test a sequence of operations
-                FluentActions.Invoking(() =>
-                {
-                    adapter.OpenPin(22, PinMode.Output);
-                    adapter.Write(22, PinValue.High);
-                    adapter.Write(22, PinValue.Low);
-                    adapter.OpenPin(23, PinMode.Output);
-                    adapter.Write(23, PinValue.High);
-                }).Should().NotThrow();
+                FluentActions
+                    .Invoking(() =>
+                    {
+                        adapter.OpenPin(22, PinMode.Output);
+                        adapter.Write(22, PinValue.High);
+                        adapter.Write(22, PinValue.Low);
+                        adapter.OpenPin(23, PinMode.Output);
+                        adapter.Write(23, PinValue.High);
+                    })
+                    .Should()
+                    .NotThrow();
 
                 adapter.Dispose();
             }
@@ -120,24 +133,29 @@ namespace ADOBuildLight.Tests.ServiceTests
                 adapter.OpenPin(24, PinMode.Output);
 
                 // Dispose should be safe to call multiple times
-                FluentActions.Invoking(() =>
-                {
-                    adapter.Dispose();
-                    adapter.Dispose(); // Second call should not throw
-                }).Should().NotThrow();
+                FluentActions
+                    .Invoking(() =>
+                    {
+                        adapter.Dispose();
+                        adapter.Dispose(); // Second call should not throw
+                    })
+                    .Should()
+                    .NotThrow();
             }
         }
 
         private static bool IsGpioSupported()
         {
             // Return false if we're in a CI environment, as GPIO hardware won't be available
-            if (Environment.GetEnvironmentVariable("CI") != null || 
-                Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != null)
+            if (
+                Environment.GetEnvironmentVariable("CI") != null
+                || Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != null
+            )
             {
                 Console.WriteLine("CI environment detected - GPIO not supported");
                 return false;
             }
-            
+
             // Try to actually create a GpioController to see if it works
             try
             {
@@ -147,7 +165,9 @@ namespace ADOBuildLight.Tests.ServiceTests
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"GpioController creation failed: {ex.GetType().Name} - {ex.Message}");
+                Console.WriteLine(
+                    $"GpioController creation failed: {ex.GetType().Name} - {ex.Message}"
+                );
                 return false;
             }
         }

@@ -1,8 +1,8 @@
-using NUnit.Framework;
-using Moq;
 using System.Device.Gpio;
-using ADOBuildLight.Services;
 using ADOBuildLight.Interfaces;
+using ADOBuildLight.Services;
+using Moq;
+using NUnit.Framework;
 
 namespace ADOBuildLight.Tests
 {
@@ -31,8 +31,14 @@ namespace ADOBuildLight.Tests
             _mockController.Verify(c => c.OpenPin(GpioPins.Green, PinMode.Output), Times.Once);
 
             _mockController.Verify(c => c.Write(GpioPins.Red, PinValue.High), Times.AtLeastOnce());
-            _mockController.Verify(c => c.Write(GpioPins.Yellow, PinValue.High), Times.AtLeastOnce());
-            _mockController.Verify(c => c.Write(GpioPins.Green, PinValue.High), Times.AtLeastOnce());
+            _mockController.Verify(
+                c => c.Write(GpioPins.Yellow, PinValue.High),
+                Times.AtLeastOnce()
+            );
+            _mockController.Verify(
+                c => c.Write(GpioPins.Green, PinValue.High),
+                Times.AtLeastOnce()
+            );
         }
 
         [TestCase(GpioPins.Red, 0, 1, 1)]
@@ -47,8 +53,14 @@ namespace ADOBuildLight.Tests
             _service.SetLightColor(color);
 
             _mockController.Verify(c => c.Write(GpioPins.Red, (PinValue)red), Times.AtLeastOnce());
-            _mockController.Verify(c => c.Write(GpioPins.Yellow, (PinValue)yellow), Times.AtLeastOnce());
-            _mockController.Verify(c => c.Write(GpioPins.Green, (PinValue)green), Times.AtLeastOnce());
+            _mockController.Verify(
+                c => c.Write(GpioPins.Yellow, (PinValue)yellow),
+                Times.AtLeastOnce()
+            );
+            _mockController.Verify(
+                c => c.Write(GpioPins.Green, (PinValue)green),
+                Times.AtLeastOnce()
+            );
         }
 
         [Test]

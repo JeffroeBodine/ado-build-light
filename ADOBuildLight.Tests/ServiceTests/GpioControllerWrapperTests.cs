@@ -1,9 +1,9 @@
-using NUnit.Framework;
-using ADOBuildLight.Services;
 using System.Device.Gpio;
+using ADOBuildLight.Interfaces;
+using ADOBuildLight.Services;
 using FluentAssertions;
 using Moq;
-using ADOBuildLight.Interfaces;
+using NUnit.Framework;
 
 namespace ADOBuildLight.Tests.ServiceTests
 {

@@ -1,8 +1,8 @@
-using NUnit.Framework;
-using ADOBuildLight.Services;
 using System;
 using System.IO;
+using ADOBuildLight.Services;
 using FluentAssertions;
+using NUnit.Framework;
 
 namespace ADOBuildLight.Tests
 {

@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -7,7 +6,6 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
     <PackageReference Include="coverlet.msbuild" Version="6.0.4">
@@ -21,16 +19,13 @@
     <PackageReference Include="NUnit.Analyzers" Version="4.4.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\ADOBuildLight\ADOBuildLight.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="..\appsettings.test.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>appsettings.json</Link>
     </Content>
   </ItemGroup>
-
 </Project>

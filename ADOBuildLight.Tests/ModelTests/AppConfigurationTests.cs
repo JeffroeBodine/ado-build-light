@@ -1,6 +1,6 @@
-using NUnit.Framework;
 using ADOBuildLight.Models;
 using FluentAssertions;
+using NUnit.Framework;
 
 namespace ADOBuildLight.Tests.ModelTests
 {

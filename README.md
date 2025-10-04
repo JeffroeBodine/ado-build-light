@@ -100,6 +100,9 @@ dotnet build
 dotnet run --project ADOBuildLight
 ```
 
+### 4. Artifacts
+   - You can also download the artifacts from the tag and run it using dotnet `ADOBuildLight.dll`
+
 The application will:
 
 - Detect if running on Raspberry Pi (uses real GPIO) or other systems (console output only)

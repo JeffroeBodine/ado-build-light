@@ -1,13 +1,13 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using NUnit.Framework;
+using ADOBuildLight.Interfaces;
+using ADOBuildLight.Models;
+using ADOBuildLight.Services;
 using FluentAssertions;
 using Moq;
 using Moq.Protected;
-using ADOBuildLight.Services;
-using ADOBuildLight.Models;
-using ADOBuildLight.Interfaces;
+using NUnit.Framework;
 using static ADOBuildLight.Models.AppConfiguration;
 
 namespace ADOBuildLight.Tests.ServiceTests
@@ -25,16 +25,16 @@ namespace ADOBuildLight.Tests.ServiceTests
         {
             _mockConfig = new Mock<IAppConfiguration>();
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-            
+
             // Setup mock configuration with real objects
             var azureDevOpsSettings = new AzureDevOpsSettings
             {
                 Organization = "test-org",
-                Project = "test-project", 
+                Project = "test-project",
                 PipelineId = "123",
-                PersonalAccessToken = "test-token"
+                PersonalAccessToken = "test-token",
             };
-            
+
             _mockConfig.Setup(x => x.AzureDevOps).Returns(azureDevOpsSettings);
 
             _httpClient = new HttpClient(_mockHttpMessageHandler.Object);
@@ -56,34 +56,57 @@ namespace ADOBuildLight.Tests.ServiceTests
                 Count = 2,
                 Value = new List<PipelineRun>
                 {
-                    new PipelineRun { Id = 1, CreatedDate = DateTime.Now.AddDays(-2), State = "completed", Result = "succeeded" },
-                    new PipelineRun { Id = 2, CreatedDate = DateTime.Now.AddDays(-1), State = "completed", Result = "failed" }
-                }
+                    new PipelineRun
+                    {
+                        Id = 1,
+                        CreatedDate = DateTime.Now.AddDays(-2),
+                        State = "completed",
+                        Result = "succeeded",
+                    },
+                    new PipelineRun
+                    {
+                        Id = 2,
+                        CreatedDate = DateTime.Now.AddDays(-1),
+                        State = "completed",
+                        Result = "failed",
+                    },
+                },
             };
 
-            var buildResponse = new BuildResponse
-            {
-                Status = "completed",
-                Result = "failed"
-            };
+            var buildResponse = new BuildResponse { Status = "completed", Result = "failed" };
 
             var pipelineRunsJson = JsonSerializer.Serialize(pipelineRunsResponse);
             var buildResponseJson = JsonSerializer.Serialize(buildResponse);
 
-            _mockHttpMessageHandler.Protected()
-                .SetupSequence<Task<HttpResponseMessage>>("SendAsync", 
-                    ItExpr.IsAny<HttpRequestMessage>(), 
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(pipelineRunsJson, Encoding.UTF8, "application/json")
-                })
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(buildResponseJson, Encoding.UTF8, "application/json")
-                });
+            _mockHttpMessageHandler
+                .Protected()
+                .SetupSequence<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            pipelineRunsJson,
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            buildResponseJson,
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                );
 
             // Act
             var result = await _pipelineService.GetLatestPipelineRunAsync();
@@ -101,20 +124,29 @@ namespace ADOBuildLight.Tests.ServiceTests
             var pipelineRunsResponse = new PipelineRunsResponse
             {
                 Count = 0,
-                Value = new List<PipelineRun>()
+                Value = new List<PipelineRun>(),
             };
 
             var pipelineRunsJson = JsonSerializer.Serialize(pipelineRunsResponse);
 
-            _mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync",
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(pipelineRunsJson, Encoding.UTF8, "application/json")
-                });
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            pipelineRunsJson,
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                );
 
             // Act
             var result = await _pipelineService.GetLatestPipelineRunAsync();
@@ -127,10 +159,13 @@ namespace ADOBuildLight.Tests.ServiceTests
         public async Task GetLatestPipelineRunAsync_WithHttpException_ReturnsNull()
         {
             // Arrange
-            _mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync",
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
+                    ItExpr.IsAny<CancellationToken>()
+                )
                 .ThrowsAsync(new HttpRequestException("Network error"));
 
             // Act
@@ -144,15 +179,24 @@ namespace ADOBuildLight.Tests.ServiceTests
         public async Task GetLatestPipelineRunAsync_WithInvalidJson_ReturnsNull()
         {
             // Arrange
-            _mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync",
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent("invalid json", Encoding.UTF8, "application/json")
-                });
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            "invalid json",
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                );
 
             // Act
             var result = await _pipelineService.GetLatestPipelineRunAsync();
@@ -165,15 +209,20 @@ namespace ADOBuildLight.Tests.ServiceTests
         public async Task GetLatestPipelineRunAsync_WithNullPipelineRunsResponse_ReturnsNull()
         {
             // Arrange
-            _mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync",
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent("null", Encoding.UTF8, "application/json")
-                });
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent("null", Encoding.UTF8, "application/json"),
+                    }
+                );
 
             // Act
             var result = await _pipelineService.GetLatestPipelineRunAsync();
@@ -191,21 +240,36 @@ namespace ADOBuildLight.Tests.ServiceTests
                 Count = 1,
                 Value = new List<PipelineRun>
                 {
-                    new PipelineRun { Id = 1, CreatedDate = DateTime.Now, State = "completed", Result = "succeeded" }
-                }
+                    new PipelineRun
+                    {
+                        Id = 1,
+                        CreatedDate = DateTime.Now,
+                        State = "completed",
+                        Result = "succeeded",
+                    },
+                },
             };
 
             var pipelineRunsJson = JsonSerializer.Serialize(pipelineRunsResponse);
 
-            _mockHttpMessageHandler.Protected()
-                .SetupSequence<Task<HttpResponseMessage>>("SendAsync",
+            _mockHttpMessageHandler
+                .Protected()
+                .SetupSequence<Task<HttpResponseMessage>>(
+                    "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(pipelineRunsJson, Encoding.UTF8, "application/json")
-                })
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            pipelineRunsJson,
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                )
                 .ThrowsAsync(new HttpRequestException("Build details error"));
 
             // Act
@@ -224,26 +288,47 @@ namespace ADOBuildLight.Tests.ServiceTests
                 Count = 1,
                 Value = new List<PipelineRun>
                 {
-                    new PipelineRun { Id = 1, CreatedDate = DateTime.Now, State = "completed", Result = "succeeded" }
-                }
+                    new PipelineRun
+                    {
+                        Id = 1,
+                        CreatedDate = DateTime.Now,
+                        State = "completed",
+                        Result = "succeeded",
+                    },
+                },
             };
 
             var pipelineRunsJson = JsonSerializer.Serialize(pipelineRunsResponse);
 
-            _mockHttpMessageHandler.Protected()
-                .SetupSequence<Task<HttpResponseMessage>>("SendAsync",
+            _mockHttpMessageHandler
+                .Protected()
+                .SetupSequence<Task<HttpResponseMessage>>(
+                    "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(pipelineRunsJson, Encoding.UTF8, "application/json")
-                })
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent("invalid build json", Encoding.UTF8, "application/json")
-                });
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            pipelineRunsJson,
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            "invalid build json",
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                );
 
             // Act
             var result = await _pipelineService.GetLatestPipelineRunAsync();
@@ -258,40 +343,63 @@ namespace ADOBuildLight.Tests.ServiceTests
             // Arrange
             var olderDate = DateTime.Now.AddDays(-3);
             var newerDate = DateTime.Now.AddDays(-1);
-            
+
             var pipelineRunsResponse = new PipelineRunsResponse
             {
                 Count = 2,
                 Value = new List<PipelineRun>
                 {
-                    new PipelineRun { Id = 1, CreatedDate = olderDate, State = "completed", Result = "succeeded" },
-                    new PipelineRun { Id = 2, CreatedDate = newerDate, State = "completed", Result = "failed" }
-                }
+                    new PipelineRun
+                    {
+                        Id = 1,
+                        CreatedDate = olderDate,
+                        State = "completed",
+                        Result = "succeeded",
+                    },
+                    new PipelineRun
+                    {
+                        Id = 2,
+                        CreatedDate = newerDate,
+                        State = "completed",
+                        Result = "failed",
+                    },
+                },
             };
 
-            var buildResponse = new BuildResponse
-            {
-                Status = "completed",
-                Result = "failed"
-            };
+            var buildResponse = new BuildResponse { Status = "completed", Result = "failed" };
 
             var pipelineRunsJson = JsonSerializer.Serialize(pipelineRunsResponse);
             var buildResponseJson = JsonSerializer.Serialize(buildResponse);
 
-            _mockHttpMessageHandler.Protected()
-                .SetupSequence<Task<HttpResponseMessage>>("SendAsync",
+            _mockHttpMessageHandler
+                .Protected()
+                .SetupSequence<Task<HttpResponseMessage>>(
+                    "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(pipelineRunsJson, Encoding.UTF8, "application/json")
-                })
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(buildResponseJson, Encoding.UTF8, "application/json")
-                });
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            pipelineRunsJson,
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                )
+                .ReturnsAsync(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(
+                            buildResponseJson,
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                    }
+                );
 
             // Act
             var result = await _pipelineService.GetLatestPipelineRunAsync();
@@ -310,8 +418,14 @@ namespace ADOBuildLight.Tests.ServiceTests
                 Count = 1,
                 Value = new List<PipelineRun>
                 {
-                    new PipelineRun { Id = 1, CreatedDate = DateTime.Now, State = "completed", Result = "succeeded" }
-                }
+                    new PipelineRun
+                    {
+                        Id = 1,
+                        CreatedDate = DateTime.Now,
+                        State = "completed",
+                        Result = "succeeded",
+                    },
+                },
             };
 
             var buildResponse = new BuildResponse { Status = "completed", Result = "succeeded" };
@@ -319,40 +433,55 @@ namespace ADOBuildLight.Tests.ServiceTests
             var buildResponseJson = JsonSerializer.Serialize(buildResponse);
 
             var requestCount = 0;
-            _mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync",
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync((HttpRequestMessage request, CancellationToken token) =>
-                {
-                    requestCount++;
-                    
-                    // Verify headers for both requests
-                    request.Headers.Accept.Should().Contain(h => h.MediaType == "application/json");
-                    request.Headers.Authorization.Should().NotBeNull();
-                    request.Headers.Authorization.Scheme.Should().Be("Basic");
-                    
-                    if (requestCount == 1)
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(
+                    (HttpRequestMessage request, CancellationToken token) =>
                     {
-                        // First request - pipeline runs
-                        request.RequestUri?.ToString().Should().Contain("_apis/pipelines");
-                        return new HttpResponseMessage
+                        requestCount++;
+
+                        // Verify headers for both requests
+                        request
+                            .Headers.Accept.Should()
+                            .Contain(h => h.MediaType == "application/json");
+                        request.Headers.Authorization.Should().NotBeNull();
+                        request.Headers.Authorization.Scheme.Should().Be("Basic");
+
+                        if (requestCount == 1)
                         {
-                            StatusCode = HttpStatusCode.OK,
-                            Content = new StringContent(pipelineRunsJson, Encoding.UTF8, "application/json")
-                        };
-                    }
-                    else
-                    {
-                        // Second request - build details
-                        request.RequestUri?.ToString().Should().Contain("_apis/build/builds");
-                        return new HttpResponseMessage
+                            // First request - pipeline runs
+                            request.RequestUri?.ToString().Should().Contain("_apis/pipelines");
+                            return new HttpResponseMessage
+                            {
+                                StatusCode = HttpStatusCode.OK,
+                                Content = new StringContent(
+                                    pipelineRunsJson,
+                                    Encoding.UTF8,
+                                    "application/json"
+                                ),
+                            };
+                        }
+                        else
                         {
-                            StatusCode = HttpStatusCode.OK,
-                            Content = new StringContent(buildResponseJson, Encoding.UTF8, "application/json")
-                        };
+                            // Second request - build details
+                            request.RequestUri?.ToString().Should().Contain("_apis/build/builds");
+                            return new HttpResponseMessage
+                            {
+                                StatusCode = HttpStatusCode.OK,
+                                Content = new StringContent(
+                                    buildResponseJson,
+                                    Encoding.UTF8,
+                                    "application/json"
+                                ),
+                            };
+                        }
                     }
-                });
+                );
 
             // Act
             var result = await _pipelineService.GetLatestPipelineRunAsync();
