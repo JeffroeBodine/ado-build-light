@@ -3,17 +3,13 @@ using ADOBuildLight.Interfaces;
 
 namespace ADOBuildLight.Services
 {
-    public class GpioControllerWrapper : IGpioController
+    public class RealGpioControllerAdapter : IGpioControllerInternal
     {
-        private readonly IGpioControllerInternal _controller;
+        private readonly GpioController _controller;
 
-        public GpioControllerWrapper() : this(new RealGpioControllerAdapter())
+        public RealGpioControllerAdapter()
         {
-        }
-
-        public GpioControllerWrapper(IGpioControllerInternal controller)
-        {
-            _controller = controller;
+            _controller = new GpioController();
         }
 
         public void OpenPin(int pinNumber, PinMode mode)
