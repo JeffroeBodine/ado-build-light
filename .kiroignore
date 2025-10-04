@@ -1,0 +1,6 @@
+# Prevent Kiro from accessing files with secrets
+appsettings.json
+.env
+.env.*
+secrets.json
+**/secrets.json
