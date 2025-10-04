@@ -25,7 +25,6 @@ namespace ADOBuildLight.Tests.ServiceTests
         }
 
         [Test]
-        [Ignore("Verifying if there is an issue with these tests in CI")]
         public void Can_Instantiate_RealGpioControllerAdapter()
         {
             // This test will only pass on supported platforms (like Raspberry Pi)
