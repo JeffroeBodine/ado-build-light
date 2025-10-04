@@ -11,12 +11,17 @@ namespace ADOBuildLight.Tests.ServiceTests
         [Test]
         public void Debugging()
         {
-             // Check if we're on a platform that supports GPIO
+            // Check if we're on a platform that supports GPIO
             Console.WriteLine("Checking if GPIO is supported on this platform...");
             Console.WriteLine($"Platform: {Environment.OSVersion.Platform}");
             Console.WriteLine($"Model file exists: {File.Exists("/proc/device-tree/model")}");
             Console.WriteLine($"Is CI Environment: {Environment.GetEnvironmentVariable("CI") != null}");
             Console.WriteLine($"Is GitHub Actions: {Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != null}");
+
+            if (IsGpioSupported())
+            {
+
+            }
         }
 
         [Test]
