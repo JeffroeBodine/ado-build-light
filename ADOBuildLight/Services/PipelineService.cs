@@ -11,9 +11,13 @@ public class PipelineService : IPipelineService
     private readonly HttpClient _httpClient;
     private readonly IAppConfiguration _config;
     
-    public PipelineService(IAppConfiguration config)
+    public PipelineService(IAppConfiguration config) : this(config, new HttpClient())
     {
-        _httpClient = new HttpClient();
+    }
+    
+    public PipelineService(IAppConfiguration config, HttpClient httpClient)
+    {
+        _httpClient = httpClient;
         _config = config;
     }
 
