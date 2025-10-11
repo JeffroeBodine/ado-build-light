@@ -33,7 +33,7 @@ jobs:
       uses: actions/upload-artifact@v4.3.4
       with:
         name: ado-build-light-zip
-        path: ./ado-build-light-v${{ github.run_number }}.zip
+        path: ./ado-build-light-v0.0.${{ github.run_number }}.zip
         if-no-files-found: error
         
     - name: Create Release
