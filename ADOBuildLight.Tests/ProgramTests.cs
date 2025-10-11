@@ -564,20 +564,13 @@ namespace ADOBuildLight.Tests
         #region LoadConfiguration Tests
 
         [Test]
-        public void LoadConfiguration_WithValidConfigFile_ReturnsConfiguration()
+        public void LoadConfiguration_WithValidTestConfigFile_ReturnsConfiguration()
         {
-            // This test would require setting up a temporary appsettings.json file
-            // For now, we'll test the validation logic that's part of LoadConfiguration
-            var result = InvokePrivateStaticMethod<Models.AppConfiguration?>("LoadConfiguration");
+            // Uses appsettings.test.json linked as appsettings.json via project file
+            var result = Services.ConfigurationBuilderService.LoadConfiguration(_ => true);
 
-            // The result will be null on Windows without appsettings.json, which is expected
-            // This test mainly ensures the method doesn't throw exceptions
-            FluentActions
-                .Invoking(() =>
-                    InvokePrivateStaticMethod<Models.AppConfiguration?>("LoadConfiguration")
-                )
-                .Should()
-                .NotThrow();
+            result.Should().NotBeNull("configuration should load from test appsettings");
+            result!.AzureDevOps.Should().NotBeNull();
         }
 
         #endregion

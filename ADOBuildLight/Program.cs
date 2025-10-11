@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using ADOBuildLight.Interfaces;
 using ADOBuildLight.Services;
-using Microsoft.Extensions.Configuration;
 
 namespace ADOBuildLight;
 
@@ -9,43 +8,11 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        var config = LoadConfiguration();
+        var config = ConfigurationBuilderService.LoadConfiguration(AppSettingsValidation);
         if (config == null)
-        {
             return;
-        }
 
         await RunApplicationAsync(config);
-    }
-
-    private static Models.AppConfiguration? LoadConfiguration()
-    {
-        IConfigurationRoot configuration;
-
-        try
-        {
-            configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-        }
-        catch (FileNotFoundException fnfex)
-        {
-            Console.WriteLine(
-                $"Configuration file not found. Please copy and modify the `appsettings.json` file. Error: {fnfex.Message}"
-            );
-            return null;
-        }
-
-        var config = new Models.AppConfiguration();
-        configuration.Bind(config);
-        bool validAppSettingsValues = AppSettingsValidation(config);
-        if (!validAppSettingsValues)
-        {
-            return null;
-        }
-
-        return config;
     }
 
     private static async Task RunApplicationAsync(Models.AppConfiguration config)
