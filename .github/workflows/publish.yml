@@ -40,8 +40,8 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v2.3.4
       with:
-        tag_name: v${{ github.run_number }}
+        tag_name: v0.0.${{ github.run_number }}
         body: |
           Automated release for build ${{ github.run_number }}
         files: |
-          ./ado-build-light-v${{ github.run_number }}.zip
+          ./ado-build-light-v0.0.${{ github.run_number }}.zip
