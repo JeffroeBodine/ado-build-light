@@ -23,7 +23,7 @@ jobs:
     - name: Package artifacts (zip)
       run: |
         VERSION="v0.0.${{ github.run_number }}"
-        ZIP_NAME="ado-build-light-v0.0.${VERSION}.zip"
+        ZIP_NAME="ado-build-light-${VERSION}.zip"
         # Ensure deterministic ordering and preserve executable bits if any
         (cd artifacts && zip -r "../${ZIP_NAME}" .)
         echo "Created ${ZIP_NAME}" && ls -l ${ZIP_NAME}
