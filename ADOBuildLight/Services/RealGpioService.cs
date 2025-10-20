@@ -61,9 +61,9 @@ public class RealGpioService : IGpioService
                 _controller.Write(GpioPins.Green, PinValue.Low);
                 break;
             case var pin when pin == GpioPins.Orange:
-                _controller.Write(GpioPins.Red, PinValue.Low);
+                _controller.Write(GpioPins.Red, PinValue.High);
                 _controller.Write(GpioPins.Yellow, PinValue.Low);
-                _controller.Write(GpioPins.Green, PinValue.High);
+                _controller.Write(GpioPins.Green, PinValue.Low);
                 break;
             default:
                 _controller.Write(GpioPins.Red, PinValue.High);
